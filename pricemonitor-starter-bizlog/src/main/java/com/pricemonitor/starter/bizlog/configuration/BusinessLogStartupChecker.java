@@ -1,0 +1,83 @@
+package com.pricemonitor.starter.bizlog.configuration;
+
+import com.pricemonitor.starter.bizlog.listener.DefaultBusinessLogProcessor;
+import com.pricemonitor.starter.bizlog.processor.BusinessLogProcessor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * 业务日志启动检查器
+ * 
+ * <p>在应用启动时检查业务日志处理器的配置情况，并给出友好的提示。</p>
+ * 
+ * @author pricemonitor
+ */
+@Slf4j
+@Component
+@ConditionalOnProperty(
+    prefix = "pricemonitor.bizlog",
+    name = "startup-check",
+    havingValue = "true",
+    matchIfMissing = true
+)
+public class BusinessLogStartupChecker {
+
+    private final ApplicationContext applicationContext;
+
+    public BusinessLogStartupChecker(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
+
+    /**
+     * 在 Spring 容器刷新后执行检查
+     *
+     * @param event 容器刷新事件
+     */
+    @EventListener(ContextRefreshedEvent.class)
+    public void checkBusinessLogProcessors(ContextRefreshedEvent event) {
+        // 防止在子容器中重复检查
+        if (event.getApplicationContext().getParent() != null) {
+            return;
+        }
+
+        try {
+            List<BusinessLogProcessor> processors = applicationContext.getBeansOfType(BusinessLogProcessor.class)
+                    .values()
+                    .stream()
+                    .filter(processor -> !(processor instanceof DefaultBusinessLogProcessor))
+                    .collect(Collectors.toList());
+
+            if (processors.isEmpty()) {
+                log.warn("═══════════════════════════════════════════════════════════════");
+                log.warn("业务日志配置提示");
+                log.warn("═══════════════════════════════════════════════════════════════");
+                log.warn("未检测到自定义的 BusinessLogProcessor 实现");
+                log.warn("业务日志将使用默认处理器输出到日志文件");
+                log.warn("");
+                log.warn("建议：在生产环境中，请实现自定义的 BusinessLogProcessor");
+                log.warn("       以将业务日志持久化到数据库或其他存储系统");
+                log.warn("");
+                log.warn("示例实现：");
+                log.warn("  @Component");
+                log.warn("  public class MyBusinessLogProcessor implements BusinessLogProcessor {");
+                log.warn("      @Override");
+                log.warn("      public void process(BusinessLogDTO logDTO) {");
+                log.warn("          // 保存到数据库");
+                log.warn("      }");
+                log.warn("  }");
+                log.warn("═══════════════════════════════════════════════════════════════");
+            } else {
+                log.info("业务日志处理器配置正常，共找到 {} 个自定义处理器", processors.size());
+            }
+        } catch (Exception e) {
+            log.info("检查业务日志处理器时出错", e);
+        }
+    }
+}
