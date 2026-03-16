@@ -54,14 +54,14 @@ public class BusinessLogDTO implements Serializable {
     private String tenantName;
 
     /**
-     * 用户ID
+     * 操作人ID
      */
     private String userId;
 
     /**
-     * 操作人
+     * 操作人名称
      */
-    private String operator;
+    private String userName;
 
     /**
      * 用户类型

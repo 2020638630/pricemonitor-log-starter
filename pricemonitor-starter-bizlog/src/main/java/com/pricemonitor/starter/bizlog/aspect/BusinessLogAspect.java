@@ -103,24 +103,24 @@ public class BusinessLogAspect {
 
                     logDTO.setTenantId(tenantId)
                             .setUserId(userId)
-                            .setOperator(userName)
+                            .setUserName(userName)
                             .setUserType("用户");
 
                     log.debug("获取到用户信息: userId={}, userName={}, tenantId={}", userId, userName, tenantId);
                 } else {
                     logDTO.setTenantName("系统")
-                            .setOperator("系统")
+                            .setUserName("系统")
                             .setUserType("系统");
                 }
             } catch (ClassNotFoundException classNotFoundException) {
                 log.warn("未找到TokenInfoContext类，使用系统默认用户");
                 logDTO.setTenantName("系统")
-                        .setOperator("系统")
+                        .setUserName("系统")
                         .setUserType("系统");
             } catch (Exception exception) {
                 log.warn("获取用户信息失败", exception);
                 logDTO.setTenantName("系统")
-                        .setOperator("系统")
+                        .setUserName("系统")
                         .setUserType("系统");
             }
 

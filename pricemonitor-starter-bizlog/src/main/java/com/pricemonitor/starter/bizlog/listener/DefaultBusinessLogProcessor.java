@@ -30,7 +30,7 @@ public class DefaultBusinessLogProcessor implements BusinessLogProcessor, Ordere
         log.info("业务编码: {}", logDTO.getCode());
         log.info("业务描述: {}", logDTO.getDescription());
         log.info("用户ID: {}", logDTO.getUserId());
-        log.info("操作人: {}", logDTO.getOperator());
+        log.info("操作人: {}", logDTO.getUserName());
         log.info("租户ID: {}", logDTO.getTenantId());
         log.info("用户类型: {}", logDTO.getUserType());
         log.info("请求参数: {}", logDTO.getParams());
